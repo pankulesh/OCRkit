@@ -1,34 +1,37 @@
 #!/usr/bin/python
 import numpy as np
 import argparse
-from scipy.integrate import trapz, simps
+from scipy.integrate import simps
 
-parser = argparse.ArgumentParser(description='Integrate luminocity function and ')
-parser.add_argument('in_file', type=str, help='Input file name (lf.txt)')
-parser.add_argument("-o", "--outfile", default="lf_nums_mass.txt", help='Output filename, default lf_nums_mass.txt')
-#parser.add_argument('name', type=str, help="Cluster name (as in filenames)")
-#parser.add_argument('h', type=str, help="Kernel halfwidth (as in filenames)")
+parser = argparse.ArgumentParser(description='Программа интегрирует все функции блеска по имени скопления. Функции блеска должны находиться в файлах типа lf_{имяскопления}_{r, 2c, 4c}.txt.')
+parser.add_argument('name', type=str, help='Имя скопления')
+parser.add_argument("-o", "--outfile", default="lf_nums_mass.txt", help='Имя выходного файла, по-умолчанию lf_{имяскопления}_numstars.txt')
 args = parser.parse_args()
 
-in_file = args.in_file
+name = args.name
 out_file = args.outfile
 
-lumfun = np.loadtxt(in_file, unpack=True)
-mag, lf, lf_lo, lf_up = lumfun
-numbers = ["Number of stars from LF: ", 
-           "Lower bound:             ", 
-           "Upper bound:             ",
+ts = ('r', '2c', '4c')
+
+def integrate(lumfun):
+    mag, lf, lf_lo, lf_up = lumfun
+    I = [simps(y, x) for x, y in ([mag, lf], [mag, lf_lo], [mag, lf_up])]
+    sigma = max(I[2]-I[0], I[0]-I[1])
+    return I, sigma
+
+numbers = ["Тип области сравнения", 
+           "Число звёзд", 
+           "Погрешность",
+           "Верхняя граница", 
+           "Нижняя граница",
            ]
-z = 0
 
 with open(out_file, 'w') as f:
-    f.write("                         COUNTED WITH SIMPSON'S METHOD COUNTED WITH TRAPEZOIDS\n")
-
-    for x, y in ([mag, lf], [mag, lf_lo], [mag, lf_up]):
-        I1s = simps(y, x)
-        I1t = trapz(y, x)
-        f.write('{0}{I1s:29.2f} {I1t:23.2f}\n'.format(numbers[z], **locals()))
-        z +=1
+    f.write("{:>21} {:>15} {:>15} {:>15} {:>15}\n".format(*numbers))
+    for t in ts:
+        lumfun = np.loadtxt(f"lf_{name}_{t}.txt", unpack=True)
+        I, sigma = integrate(lumfun)
+        f.write("{:>21} {:>15.2f} {:>15.2f} {:>15.2f} {:>15.2f}\n".format(t, I[0], sigma, I[1], I[2]))
 
 with open(out_file, 'r') as f:
     print(f.read())

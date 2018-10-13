@@ -96,7 +96,7 @@ def plot_lf(kind, argument, density, disp):
     plt.close()
 
 def write_line(i, argument, density, disp):
-    return '{0:.3f}\t{1:.6f}\t{2:.6f}\t{3:.6f}\n'.format(argument[i], lf_cluster.density[i], lf_cluster.density[i]-lf_cluster.d_disp[i], lf_cluster.density[i]+lf_cluster.d_disp[i])
+    return '{0:.3f}\t{1:.6f}\t{2:.6f}\t{3:.6f}\n'.format(argument[i], density[i], density[i]-disp[i], density[i]+disp[i])
 
 def write_file(filename, argument, density, disp):
     with open(filename, 'w') as f:
