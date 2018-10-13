@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Программа ищет цен
 parser.add_argument("infile", help='Имя входного файла')
 parser.add_argument("name", help="Имя скопления для заголовков графиков")
 parser.add_argument("delta", type=float, help="Полуширина ядра в угловых минутах")
-parser.add_argument("-l", "--maglim", default=21, help="Предельная звёздная величина G, по-умолчанию 21")
+parser.add_argument("-l", "--maglim", default=16, help="Предельная звёздная величина J, по-умолчанию 16")
 parser.add_argument("-s", "--step", default=0.05, help="Шаг для построения в угловых минутах, по-умолчанию 0.05'")
 parser.add_argument("-r", "--rmax", default=30, help="Максимальное расстояние от центра в угловых минутах, по-умолчанию 30'")
 args = parser.parse_args()
@@ -23,19 +23,18 @@ rmax = args.rmax
 delta = args.delta
 cores = cpu_count()
 
+xymag = (0, 1, 5)
+magtype = 'J'
+
 nboot = 100
 #Этот массив можно и нужно менять, если центры определяются плохо
 centers = {
+    11: [-5, -3, 3, 5, -5, -3, 3, 5],
     12: [-5, -3, 3, 5, -5, -3, 3, 5],
     13: [-5, -3, 3, 5, -5, -3, 3, 5],
     14: [-5, -3, 3, 5, -5, -3, 3, 5],
     15: [-5, -3, 3, 5, -5, -3, 3, 5],
-    16: [-5, -3, 3, 5, -5, -3, 3, 5],
-    17: [-5, -3, 3, 5, -5, -3, 3, 5],
-    18: [-5, -3, 3, 5, -5, -3, 3, 5],
-    19: [-5, -3, 3, 5, -5, -3, 3, 5],
-    20: [-5, -3, 3, 5, -5, -3, 3, 5],
-    21: [-5, -3, 3, 5, -5, -3, 3, 5]
+    16: [-5, -3, 3, 5, -5, -3, 3, 5]
 }
 maglims = list(centers.keys())
 
@@ -121,7 +120,9 @@ def findcentres(inarr, maglim, delta, step):
     maxims = (xld.maxim, yld.maxim)
     return maxims
 
-stars = np.loadtxt(infile, usecols=(0, 1, -6), comments='#')
+
+
+stars = np.loadtxt(infile, usecols=xymag, comments='#')
 
 for maglim in maglims:
     x0, y0 = findcentres(stars, maglim, delta, step)
@@ -202,7 +203,7 @@ for maglim in maglims:
     a = np.loadtxt('density_{0}_{1}_{2}.txt'.format(name, maglim, delta), unpack=True, usecols=(0,1,3,4))
     r = a[0]
     fig = plt.figure(figsize=(10,10))
-    plt.title("Радиальный профиль плотности {0},\nh={1}', Glim={2}m".format(name, delta, maglim), fontsize=18)
+    plt.title("Радиальный профиль плотности {0},\nh={1}', {3}lim={2}m".format(name, delta, maglim, magtype), fontsize=18)
     plt.plot(r, a[1], 'k', linewidth=1)
     plt.plot(r, a[2], 'k', linestyle='dashed', linewidth=1)
     plt.plot(r, a[3], 'k', linestyle='dashed', linewidth=1)

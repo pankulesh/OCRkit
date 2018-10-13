@@ -10,7 +10,7 @@ import numpy as np
 parser = argparse.ArgumentParser(description='Программа строит профили радиальной плотности с разными параметрами KDE для определения оптимального.')
 parser.add_argument("infile", help='Имя входного файла')
 parser.add_argument("name", help="Имя скопления для заголовков")
-parser.add_argument("-l", "--maglim", default=21, help="Предельная звёздная величина в полосе G, по-умолчанию 21")
+parser.add_argument("-l", "--maglim", default=16, help="Предельная звёздная величина, по-умолчанию 16")
 parser.add_argument("-s", "--step", default=0.05, help="Шаг для построения в угловых минутах, по-умолчанию 0.05'")
 parser.add_argument("-r", "--rmax", default=10, help="Максимальное расстояние от центра, по-умолчанию 10'")
 args = parser.parse_args()
@@ -21,9 +21,13 @@ maglim = args.maglim
 rmax = args.rmax
 cores = cpu_count()
 nboot = 1
+
 hs = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2, 3, 4, 5]
 
-stars = np.loadtxt(infile, usecols=(0, 1, -6), comments='#')
+xymag = (0, 1, 5)
+magtype = 'J'
+
+stars = np.loadtxt(infile, usecols=xymag, comments='#')
 
 for h in hs:
     x0, y0 = 0, 0
@@ -123,6 +127,3 @@ plt.grid(alpha=0.2, linestyle='dashed', linewidth=0.5)
 fig.savefig('densities_{0}_{1}.png'.format(name, maglim), dpi=100, transparent=False)
 plt.show()
 plt.close()
-
-
-

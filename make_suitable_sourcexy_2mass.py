@@ -52,24 +52,22 @@ with open(outfile, 'w') as g:
                     g.write(title.format(*measures))
             if line.startswith('-'):
                 pat = [pos for pos, char in enumerate(line) if char == '\t']	
-#                print(pat)
             if line[0].isdigit():
-#                words = line.split()
                 words = split_at(line, pat)
-                alpha, delta = words[0], words[1]
+                alpha, delta = words[0].strip(), words[1].strip()
                 x, y = countxy(float(alpha0), float(delta0), float(alpha), float(delta))
-                source = words[2]
-                j, h, k = [float(i) for words[3], words[5], words[7]]
+                source = words[2].strip()
+                j, h, k = [float(i) for i in (words[3], words[5], words[7])]
                 try:
                     ej = float(words[4])
                 except ValueError:
                     ej = 9.999
                 try:
-                    eh = float(words[4])
+                    eh = float(words[6])
                 except ValueError:
                     eh = 9.999
                 try:
-                    ek = float(words[4])
+                    ek = float(words[8])
                 except ValueError:
                     ek = 9.999
                 jmh = j - h
@@ -81,7 +79,7 @@ with open(outfile, 'w') as g:
                 if ek==9.999 or eh==9.999:
                     ehmk = 9.999
                 else:
-                    ejmh = np.sqrt(ej*ej+eh*eh)
-                values = (x, y, alpha, delta, source,j, ej, h, eh, k, ek, jmh, ejhm, hmk, ehmk)
+                    ehmk = np.sqrt(ek*ek+eh*eh)
+                values = (x, y, alpha, delta, source,j, ej, h, eh, k, ek, jmh, ejmh, hmk, ehmk)
                 g.write(star.format(*values))
 
