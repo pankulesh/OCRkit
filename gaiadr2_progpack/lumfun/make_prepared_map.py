@@ -45,16 +45,7 @@ contour_filled = plt.contourf(xi, yi, zi, levels, cmap=plt.cm.Greys)
 if args.circles:
     parameters = np.loadtxt(args.circles, comments='#')
     x0, y0, rc = parameters[3:6]
-    x1, y1 = parameters[-2:]
-    	    
-    x2 = 2*x0-x1
-    y2 = 2*y0-y1
-
-    x3 = -y1+y0+x0
-    y3 = x1-x0+y0
-
-    x4 = 2*x0-x3
-    y4 = 2*y0-y3
+    x1, y1, x2, y2, x3, y3, x4, y4 = parameters[-8:]
     
     circle(x0, y0, rc, '')
     circle(x0, y0, np.sqrt(2)*rc, '')
