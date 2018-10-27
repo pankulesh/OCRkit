@@ -25,7 +25,7 @@ def count_R_Fb(mag):
     density_msigma_spline = spline(r, densms)                                                         
     density_psigma_spline = spline(r, densps)                                                         
                                                                                                       
-    radius = np.arange(0, rmax+0.01, 0.01)
+    radius = np.arange(0, rmax+PRECISION, PRECISION)
 
     density = density_spline(radius)
     density_low = density_msigma_spline(radius)
@@ -43,7 +43,7 @@ def count_R_Fb(mag):
     plt.plot(radius, density_up, 'k', linestyle='dashed', linewidth=1)
 
     for i in range(len(radius)):
-        if rect_deviation[i] < 0.01:
+        if rect_deviation[i] < 0.5:
             R, Fb = radius[i], density[i]
             dFb = max(density_up[i]-Fb, Fb-density_low[i])
             ibound = i

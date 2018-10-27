@@ -11,7 +11,7 @@ args = parser.parse_args()
 name = args.name
 out_file = args.outfile
 
-ts = ('r', '2c', '4c')
+ts = ('r', '2c', '4c', 'cluster+back')
 
 def integrate(lumfun):
     mag, lf, lf_lo, lf_up = lumfun

@@ -48,3 +48,7 @@ for mag in mags:
     with open("numstars_{0}_h={1}.txt".format(name, h), 'a') as f:
         f.write("{0:>3d} {1:10.2f} {2:10.2f} {3:10.2f} {4:10.2f}\n".format(mag, num, senum, seint, sebkg))
     print("density_{0}_{1}_{2}.txt was counted.".format(name, mag, h))
+
+with open("numstars_{0}_h={1}.txt".format(name, h), 'r') as f:
+    print(f.read())
+
