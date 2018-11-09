@@ -57,7 +57,18 @@ with open(outfile, 'w') as g:
                 alpha, delta = words[0].strip(), words[1].strip()
                 x, y = countxy(float(alpha0), float(delta0), float(alpha), float(delta))
                 source = words[2].strip()
-                j, h, k = [float(i) for i in (words[3], words[5], words[7])]
+                try:
+                    j = float(words[3])
+                except ValueError:
+                    j = 99.999
+                try:
+                    h = float(words[5])
+                except ValueError:
+                    h = 99.999
+                try:
+                    k = float(words[7])
+                except ValueError:
+                    k = 99.999                    
                 try:
                     ej = float(words[4])
                 except ValueError:
@@ -70,12 +81,18 @@ with open(outfile, 'w') as g:
                     ek = float(words[8])
                 except ValueError:
                     ek = 9.999
-                jmh = j - h
+                if j == 99.999 or h == 99.999:
+                    jmh = 99.999
+                else:
+                    jmh = j - h
                 if ej==9.999 or eh==9.999:
                     ejmh = 9.999
                 else:
                     ejmh = np.sqrt(ej*ej+eh*eh)
-                hmk = h - k
+                if h == 99.999 or k == 99.999:    
+                    hmk = 99.999
+                else:
+                    hmk = h - k
                 if ek==9.999 or eh==9.999:
                     ehmk = 9.999
                 else:

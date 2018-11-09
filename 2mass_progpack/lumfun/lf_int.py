@@ -5,11 +5,10 @@ from scipy.integrate import simps
 
 parser = argparse.ArgumentParser(description='Программа интегрирует все функции блеска по имени скопления. Функции блеска должны находиться в файлах типа lf_{имяскопления}_{r, 2c, 4c}.txt.')
 parser.add_argument('name', type=str, help='Имя скопления')
-parser.add_argument("-o", "--outfile", default="lf_nums_mass.txt", help='Имя выходного файла, по-умолчанию lf_{имяскопления}_numstars.txt')
 args = parser.parse_args()
 
 name = args.name
-out_file = args.outfile
+out_file = f"lf_{name}_numstars.txt"
 
 ts = ('r', '2c', '4c', 'cluster+back')
 
