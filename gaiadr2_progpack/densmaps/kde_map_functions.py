@@ -6,10 +6,10 @@ from scipy.interpolate import griddata
 def plot_map(in_file, out_file, name, labels=True, colorbar=True, grid=True, show=False):
     levels = 10
     internumber = 100
-    df = pd.read_csv(in_file, header=None, delim_whitespace=True)
-    X, Y, Z = df[0], df[1], df[2]
-    xi = np.linspace(min(X), max(X), internumber) 
-    yi = np.linspace(min(Y), max(Y), internumber)
+    df = pd.read_csv(in_file)
+    X, Y, Z = df.x.values, df.y.values, df.z.values
+    xi = np.linspace(np.amin(X), np.amax(X), internumber) 
+    yi = np.linspace(np.amin(Y), np.amax(Y), internumber)
     zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='linear')  
     fig = plt.figure(figsize=(10,10))
     contour = plt.contour(xi, yi, zi, levels, colors='k')
