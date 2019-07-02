@@ -1,12 +1,13 @@
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 
-def plot_map(xyzdens, in_file, out_file, name, labels=True, colorbar=True, grid=True, show=False):
+def plot_map(in_file, out_file, name, labels=True, colorbar=True, grid=True, show=False):
     levels = 10
     internumber = 100
-    a = np.transpose(xyzdens)
-    X, Y, Z = a[0], a[1], a[2] 
+    df = pd.read_csv(in_file, header=None, delim_whitespace=True)
+    X, Y, Z = df[0], df[1], df[2]
     xi = np.linspace(min(X), max(X), internumber) 
     yi = np.linspace(min(Y), max(Y), internumber)
     zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='linear')  
@@ -23,7 +24,7 @@ def plot_map(xyzdens, in_file, out_file, name, labels=True, colorbar=True, grid=
         plt.grid(True)
     plt.axes().set_aspect('equal')
     plt.title(name)
-    fig.savefig(out_file, dpi=100, frameon=False)
+    fig.savefig(out_file, dpi=100)
     if show:
         plt.show()
     plt.close(fig)
@@ -37,7 +38,6 @@ def make_map(xymag, delta, step, magmax, map_out):
     density = np.zeros((ndim, ndim))
     xs = np.array([(-n+i)*step for i in range(0, ndim)])
     ys = np.array([(-n+i)*step for i in range(0, ndim)])
-    xydens = np.zeros((ndim**2, 3))
     k=0
     for x, y, mag in xymag:
         if magmin < mag < magmax:
@@ -66,12 +66,10 @@ def make_map(xymag, delta, step, magmax, map_out):
     
     with open(map_out, 'w') as f:
         m = 0
+        f.write("x,y,z\n")
         for i in range(0, ndim):
             for j in range(0, ndim):
-                if (xs[j]**2 + ys[i]**2) < n**2:
-                    xydens[m] = xs[j], ys[i], density[i][j]
+                if np.abs(xs[j] + ys[i])+np.abs(xs[j]-ys[j]) <= 2*n*step:
                     m+=1
-                    f.write('{0:.3f}\t{1:.3f}\t{2:.6f}\n'.format(xs[j], ys[i], density[i][j]))
+                    f.write('{0:.3f},{1:.3f},{2:.6f}\n'.format(xs[j], ys[i], density[i][j]))
     print('{0} звёзд обработано, карта {1} готова.'.format(k, map_out))
-    return xydens
-

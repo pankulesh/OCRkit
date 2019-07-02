@@ -3,10 +3,6 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
 from scipy.interpolate import griddata
 
 parser = argparse.ArgumentParser(description='Программа для построение карты поверхностной плотности по готовому файлу map_....txt')
@@ -26,7 +22,7 @@ name = 'map_{3}_{0}_{1}_{2}.'.format(size, maglim, delta, clustername)
 in_file = name+'txt'
 out_file = name+'png'
 sname = "Карта поверхностной плотности {0}:\nmaglim = {1}, h = {2}'".format(clustername, maglim, delta)
-xyz = pd.read_csv(in_file)
+xydens = pd.read_csv(in_file)
 
 def circle(x, y, radius, text):
     from matplotlib.patches import Circle
@@ -37,14 +33,36 @@ def circle(x, y, radius, text):
 labels, colorbar, grid = True, True, True
 levels = 10
 internumber = 100
-X, Y, Z = xyz.x, xyz.y, xyz.z 
+X, Y, Z = xyz.x, xyz.y, xyz.z
 xi = np.linspace(np.amin(X), np.amax(X), internumber) 
 yi = np.linspace(np.amin(Y), np.amax(Y), internumber)
 zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method='linear')  
-ax.plot_surface(xi, yi, zi)
-ax.xlabel("x, arcmin") 
-ax.ylabel("y, arcmin")
-ax.title(sname)
+fig = plt.figure(figsize=(10,10))
+contour = plt.contour(xi, yi, zi, levels, colors='k')
+if labels:
+    plt.clabel(contour, colors = 'k', fmt = '%2.1f', fontsize=10)
+contour_filled = plt.contourf(xi, yi, zi, levels, cmap=plt.cm.Greys)
+
+if args.circles:
+    parameters = np.loadtxt(args.circles, comments='#')
+    x0, y0, rc = parameters[3:6]
+    x1, y1, x2, y2, x3, y3, x4, y4 = parameters[-8:]
+    
+    circle(x0, y0, rc, '')
+    circle(x0, y0, np.sqrt(2)*rc, '')
+    circle(x1, y1, rc, '1')
+    circle(x2, y2, rc, '2')
+    circle(x3, y3, rc, '3')
+    circle(x4, y4, rc, '4')
+
+plt.xlabel("x, arcmin") 
+plt.ylabel("y, arcmin")
+if colorbar:
+    plt.colorbar(contour_filled)
+if grid:
+    plt.grid(True)
+plt.axes().set_aspect('equal')
+plt.title(sname)
 
 fig.savefig(out_file, dpi=100, frameon=False)
 plt.show()
