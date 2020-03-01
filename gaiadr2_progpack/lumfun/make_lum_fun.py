@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KernelDensity
@@ -41,15 +41,15 @@ class Region:
     def bootstrap(self, argument, kde, bandwidth, nboot=24):
         self.density = get_estimated_density(self.n, argument, kde)
         s1, s2 = (np.zeros_like(argument) for _ in range(2))
-        workers = Pool(cpu_count())
-        densities = workers.map(bootstrap0, [(self.n, kde, bandwidth, argument)]*nboot)
+#        workers = Pool(cpu_count())
+#       densities = workers.map(bootstrap0, [(self.n, kde, bandwidth, argument)]*nboot)
 #без multiprocessing'а
-#        for _ in range(nboot):
-#            newstars = kde.sample(n_samples=self.n).T[0]
-#            newkde = get_kernel_estimator(newstars, bandwidth)
-#            newvalues = get_estimated_density(argument, newkde)
-#            s1 += newvalues
-#            s2 += newvalues*newvalues
+        for _ in range(nboot):
+            newstars = kde.sample(n_samples=self.n).T[0]
+            newkde = get_kernel_estimator(newstars, bandwidth)
+            newvalues = get_estimated_density(argument, newkde)
+            s1 += newvalues
+            s2 += newvalues*newvalues
         for newvalues in densities:
             s1 += newvalues
             s2 += newvalues*newvalues
@@ -118,16 +118,19 @@ parser = argparse.ArgumentParser(description='Программа, рассчит
 parser.add_argument("infile", type=str, help='Имя входного файла')
 parser.add_argument("clustername", type=str, help='Название скопления')
 parser.add_argument("parameters", type=str, help='Имя файла с параметрами в строку: step, mag0, maglim, x0, y0, rc, delta, [x1, y1] [x2, y2] [x3, y3] [x4, y4]')
+parser.add_argument("-m", '--magcol', default='phot_g_mean_mag', help='Имя колонки со звездными величинами, по-умолчанию phot_g_mean_mag')
 parser.add_argument('-o', '--optimal', action='store_true', help='Укажите этот флаг, если нужно рассчитать оптимальный параметр KDE методом кросс-валидации (bandwidth CV)')
 parser.add_argument('-c', '--circles', action='store_true', help='Укажите этот флаг, если нужно рассчитать ФБ с областями сравнения в виде кругов вокруг скопления')
 parser.add_argument('-s', '--symm', action='store_true', help='Укажите этот флаг, если в файле с параметрами записаны координаты центра только одной круговой области сравнения — тогда остальные три рассчитаются симметрично относительно центра и запишутся в исходный файл с параметрами.')
 args = parser.parse_args()
 clustername = args.clustername
 parameters = np.loadtxt(args.parameters, comments='#')
-
-xymag = (0, 1, 13)
-mag_type = 'G'
 step, mag0, maglim, x0, y0, rc, delta = parameters[:7]
+
+mag_type = 'G'
+magcol = args.magcol
+df = pd.read_csv(args.infile)
+input_stars = np.array([df.x, df.y, df.magcol]).T
 
 if args.circles:
     x1, y1 = parameters[7:9]
@@ -168,8 +171,6 @@ if args.circles:
 
 lf_cluster = Region(x0, y0, rc, 'Скопление+фон')
 lf_ring = Region(x0, y0, rc, 'Кольцо', t='ring')
-
-input_stars = np.loadtxt(args.infile, comments='#', usecols=xymag)
 
 bounds_num = int((maglim-mag0)/step)
 argument = np.linspace(mag0, maglim, bounds_num)
